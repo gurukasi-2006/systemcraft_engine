@@ -11,7 +11,7 @@
 EntityManager::EntityManager(entt::registry &reg) : registryref(reg){}
 
 EntityID EntityManager:: createEntity(){
-    entt:uint32_t new_raw_id=static_cast<uint32_t>(registryref.create());
+    uint32_t new_raw_id=static_cast<uint32_t>(registryref.create());
     return EntityID{new_raw_id};
 }
 
