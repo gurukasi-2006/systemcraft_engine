@@ -5,7 +5,7 @@
 #include <unordered_map>
 #include <functional>
 #include <vector>
-#include "../types/entity_id.hpp"
+#include "../04_Types/entity_id.hpp"
 
 /**
  * @file component_serializer.h

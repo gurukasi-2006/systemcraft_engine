@@ -1,7 +1,7 @@
 #pragma once
 
 #include <entt/entt.hpp>
-#include "../types/entity_id.hpp"
+#include "../04_Types/entity_id.hpp"
 /**
  * @file query_builder.hpp
  * @brief Provides a fluent, chainable API for iterating over specific entities.

@@ -10,7 +10,7 @@
 #include<string>
 #include<functional>
 #include"entity_manager.hpp"
-#include "../types/entity_id.hpp"
+#include "../04_Types/entity_id.hpp"
 
 /**
  * @class ArchetypeManager
