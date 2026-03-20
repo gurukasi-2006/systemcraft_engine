@@ -6,7 +6,7 @@
  */
 
 #include <cstdint>
-#include "entt\entt.hpp"
+#include "entt/entt.hpp"
 
 /**
  * @struct EntityID
