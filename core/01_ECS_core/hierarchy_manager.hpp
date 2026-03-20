@@ -2,7 +2,7 @@
 
 #include <entt/entt.hpp>
 #include <vector>
-#include "../types/entity_id.hpp"
+#include "../04_Types/entity_id.hpp"
 
 /**
  * @file hierarchy_manager.hpp

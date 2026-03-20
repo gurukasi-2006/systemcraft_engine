@@ -1,7 +1,7 @@
 #pragma once
 
 /**
- * @file entity_id.h
+ * @file entity_id.hpp
  * @brief Defines the EntityID strong type used throughout the Systemcraft engine.
  */
 

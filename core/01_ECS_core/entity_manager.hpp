@@ -2,7 +2,7 @@
 #include <vector>
 #include <cstdint>
 #include <entt/entt.hpp>
-#include "../types/entity_id.hpp"
+#include "../04_Types/entity_id.hpp"
 
 /**
  * @file entity_manager.hpp
