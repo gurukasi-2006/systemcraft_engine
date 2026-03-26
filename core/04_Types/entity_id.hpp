@@ -36,4 +36,7 @@ struct EntityID
     {
         return EntityID::raw_id==static_cast<uint32_t>(entt::null);
     }
+
+    constexpr bool operator==(const EntityID& other) const = default;
+
 };

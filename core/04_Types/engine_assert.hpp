@@ -59,5 +59,4 @@
  * @param index The index being accessed.
  * @param array_size The total capacity of the array.
  */
-#define ASSERT_VALID_INDEX(index, array_size) \
-    ENGINE_ASSERT((index) >= 0 && (index) < (array_size), "Array index out of bounds.")
+#define ASSERT_VALID_INDEX(index, array_size) ENGINE_ASSERT((index) >= 0 && (index) < (array_size), "Array index out of bounds.")
