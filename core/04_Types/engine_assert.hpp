@@ -39,11 +39,11 @@
 
 /**
  * @brief Asserts that an EntityID wrapper points to a valid, active ECS entity.
- * @details Relies on the EntityID wrapper exposing an is_valid() or similar method, or not equating to a null constant.
- * @param entity The EntityID or raw entity handle to check.
+ * @details Relies on the EntityID wrapper exposing an IsNull() method.
+ * @param entity The EntityID wrapper to check.
  */
 #define ASSERT_VALID_ENTITY(entity) \
-    ENGINE_ASSERT((entity) != 0, "Attempted to process an invalid or null EntityID.")
+    ENGINE_ASSERT(!(entity).IsNull(), "Attempted to process an invalid or null EntityID.")
 
 /**
  * @brief Asserts that a numerical value falls strictly within a specified inclusive range.
