@@ -43,14 +43,19 @@ namespace MathUtils {
 
     /**
      * @brief Remaps a value from one numerical range to another.
+     * @details Guards against zero-width input ranges to prevent NaN propagation.
      * @param value The input value to remap.
      * @param in_min The minimum of the input range.
      * @param in_max The maximum of the input range.
      * @param out_min The minimum of the target range.
      * @param out_max The maximum of the target range.
-     * @return The remapped value in the target range.
+     * @return The remapped value in the target range, or out_min if the input range is zero.
      */
     constexpr float mapRange(float value, float in_min, float in_max, float out_min, float out_max) {
+        // Guard against floating-point division by zero!
+        if (in_min == in_max) {
+            return out_min; 
+        }
         return out_min + (value - in_min) * (out_max - out_min) / (in_max - in_min);
     }
 
