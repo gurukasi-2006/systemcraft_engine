@@ -61,11 +61,21 @@ namespace MathUtils {
 
     /**
      * @brief A high-performance floor calculation avoiding standard library overhead.
-     * @details Uses integer casting to bypass IEEE-754 edge-case handling. Ideal for coordinate snapping.
+     * @details Uses integer casting to bypass IEEE-754 edge-case handling. Guards against UB on float-to-int overflow.
      * @param value The floating-point value to floor.
      * @return The largest integer less than or equal to the value.
      */
     constexpr int32_t fastFloor(float value) {
+        // Guard against NaN (value != value is a constexpr safe NaN check)
+        if (value != value) return 0;
+        
+        // Guard against positive overflow UB
+        // Note: 2147483520.0f is the highest exact float representable strictly below INT32_MAX
+        if (value >= 2147483520.0f) return 2147483647; 
+        
+        // Guard against negative overflow UB
+        if (value <= -2147483648.0f) return -2147483648;
+
         int32_t i = static_cast<int32_t>(value);
         return (value < static_cast<float>(i)) ? (i - 1) : i;
     }
