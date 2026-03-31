@@ -102,11 +102,15 @@ struct Fixed32 {
 
     /**
      * @brief Performs deterministic fixed-point division.
-     * @details Temporarily promotes to 64-bit and shifts before division to preserve fractional precision.
+     * @details Temporarily promotes to 64-bit and shifts before division to preserve fractional precision. Guards against division by zero.
      * @param other The divisor.
-     * @return The divided fixed-point value.
+     * @return The divided fixed-point value, or 0 if a division by zero is attempted.
      */
     constexpr Fixed32 operator/(const Fixed32& other) const {
+        // Guard against hardware exceptions!
+        if (other.raw_value == 0) {
+            return Fixed32(0);
+        }
         return fromRaw(static_cast<int32_t>((static_cast<int64_t>(raw_value) << FRACTIONAL_BITS) / other.raw_value));
     }
 
