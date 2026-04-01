@@ -3,12 +3,16 @@
 #include <fstream>
 #include <string>
 #include <functional>
+#include <vector>
+
 #include "subscriber_registry.hpp"
+#include "unsubscribe_guard.hpp"
 #include "../02_Tick_Scheduler/tick_counter.hpp"
 
 /**
  * @file event_logger.hpp
  * @brief Intercepts registered events and writes them to a persistent log file with timestamps.
+ * @details Automatically cleans up event subscriptions upon destruction to prevent dangling pointers.
  */
 
 class EventLogger {
@@ -16,6 +20,9 @@ private:
     std::ofstream log_file;
     SubscriberRegistry& registry;
     const TickCounter& clock;
+
+    // RAII Guards to automatically unsubscribe when the logger is destroyed
+    std::vector<UnsubscribeGuard> subscription_guards;
 
 public:
     /**
@@ -35,6 +42,8 @@ public:
             log_file << "=== LOG TERMINATED ===\n";
             log_file.close();
         }
+        // subscription_guards vector is automatically destroyed here,
+        // triggering the destructors of UnsubscribeGuard to safely remove callbacks from the registry.
     }
 
     /**
@@ -45,13 +54,20 @@ public:
      */
     template<typename T>
     void trackEvent(const std::string& event_name, std::function<std::string(const T&)> serializer) {
-        registry.subscribe<T>([this, event_name, serializer](const T& event) {
-            if (log_file.is_open()) {
-                log_file << "[Tick: " << clock.get() << "] [" << event_name << "] "
-                         << serializer(event) << "\n";
 
-                log_file.flush();
+        // 1. Create a new RAII guard and store it in our vector so it lives as long as the Logger
+        subscription_guards.emplace_back();
+
+        // 2. Wrap our dangerous lambda with the guard's weak_ptr safety check
+        auto safe_callback = subscription_guards.back().bind<T>([this, event_name, serializer](const T& event) {
+            if (log_file.is_open()) {
+                log_file << "[" << clock.get() << "] "
+                         << event_name << ": "
+                         << serializer(event) << "\n";
             }
         });
+
+        // 3. Register the safe, wrapped callback to the Event Bus
+        registry.subscribe<T>(safe_callback);
     }
 };
