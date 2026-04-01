@@ -2,8 +2,10 @@
 
 #include <vector>
 #include <memory>
+
 #include "system_executor.hpp"
 #include "tick_counter.hpp"
+#include "../04_Types/engine_assert.hpp"
 
 /**
  * @file fixed_rate_scheduler.hpp
@@ -32,6 +34,10 @@ public:
      */
     template<typename T, typename... Args>
     void addSystem(uint64_t interval, uint64_t offset = 0, Args&&... args) {
+
+        // Guard against integer modulo-by-zero crashes!
+        ENGINE_ASSERT(interval > 0, "FixedRateScheduler: tick_interval cannot be zero.");
+
         systems.push_back({
             interval,
             offset,
@@ -49,9 +55,9 @@ public:
         uint64_t current_tick = clock.get();
 
         for (auto& sched : systems) {
+            // Evaluates execution phase based on the current tick and registered interval
             if (current_tick >= sched.phase_offset &&
                (current_tick - sched.phase_offset) % sched.tick_interval == 0) {
-
                 sched.system->update(world, dt);
             }
         }
