@@ -78,13 +78,20 @@ public:
 
     /**
      * @brief Converts a world TileCoord into its corresponding ChunkCoord.
+     * @details Uses mathematically correct flooring division to handle negative coordinates, 
+     * bypassing C++'s default truncate-toward-zero behavior.
      * @param tile The specific tile coordinate.
      * @return The macro chunk coordinate.
      */
     constexpr ChunkCoord get_chunk_coord(TileCoord tile) const {
+        // High-performance constexpr lambda for correct mathematical flooring division
+        auto floor_div = [](int32_t a, int32_t b) {
+            return a / b - (a % b != 0 && (a ^ b) < 0);
+        };
+
         return ChunkCoord{
-            tile.x / ChunkConstants::CHUNK_SIZE,
-            tile.y / ChunkConstants::CHUNK_SIZE
+            floor_div(tile.x, ChunkConstants::CHUNK_SIZE),
+            floor_div(tile.y, ChunkConstants::CHUNK_SIZE)
         };
     }
 
