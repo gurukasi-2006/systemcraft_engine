@@ -114,10 +114,13 @@ namespace HeightmapGenerator {
             frequency *= params.lacunarity;
         }
 
+        // Guard against division by zero if octaves == 0
+        if (max_possible_height == 0.0f) {
+            return Fixed32(0.0f); // Return a perfectly flat elevation
+        }
+
         // Normalize back to roughly -1.0 to 1.0
         float normalized = noise_height / max_possible_height;
 
-        // Clamp it safely into our Fixed32 engine limits
-        return MathUtils::clamp(Fixed32(normalized), Fixed32(-1.0f), Fixed32(1.0f));
-    }
+        return Fixed32(normalized);
 }
