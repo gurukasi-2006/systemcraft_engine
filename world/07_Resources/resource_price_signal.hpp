@@ -90,7 +90,11 @@ namespace Resources {
 
             // Dispatch the economic hint to the wider engine
             dispatcher_.dispatch(PriceSignalEvent{target_type, scarcity_multiplier});
-        }
+
+            // INDUSTRIAL FAILSAFE: Auto-reset the consumption tracker for this resource
+            // to prevent creeping hyperinflation if the global tick reset is missed.
+            consumption_rates_.erase(target_type);
+        }}
 
         /**
          * @brief Resets consumption trackers (usually called at the start of a new calculation cycle).
