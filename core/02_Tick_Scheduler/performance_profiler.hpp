@@ -6,6 +6,8 @@
 #include <iostream>
 #include <iomanip>
 
+#include "../04_Types/engine_assert.hpp"
+
 /**
  * @file performance_profiler.hpp
  * @brief Records execution times of systems and calculates rolling averages.
@@ -34,13 +36,20 @@ private:
      */
     TimePoint current_start;
 
+    /**
+     * @brief Guard flag to prevent mismatched timer calls.
+     */
+    bool is_active_ = false;
+
 public:
     /**
      * @brief Starts the high-precision microsecond stopwatch.
      * * MUST be called exactly before a system's update() function.
      */
     void beginTimer() {
+        ENGINE_ASSERT(!is_active_, "PerformanceProfiler: beginTimer() called twice without endTimer()!");
         current_start = Clock::now();
+        is_active_ = true;
     }
 
     /**
@@ -49,8 +58,11 @@ public:
      * @param system_name The human-readable name of the system (e.g., "PhysicsSystem").
      */
     void endTimer(const std::string& system_name) {
+        ENGINE_ASSERT(is_active_, "PerformanceProfiler: endTimer() called without beginTimer()!");
         auto end_time = Clock::now();
 
+        // Reset the guard flag immediately
+        is_active_ = false;
 
         std::chrono::duration<float, std::milli> elapsed = end_time - current_start;
         float ms = elapsed.count();
@@ -58,7 +70,6 @@ public:
         auto& data = system_profiles[system_name];
 
         if (data.call_count == 0) {
-
             data.rolling_average_ms = ms;
         } else {
             data.rolling_average_ms = (data.rolling_average_ms * 0.9f) + (ms * 0.1f);
@@ -80,9 +91,10 @@ public:
     void printReport() const {
         std::cout << "\n=== Engine Performance Profiler Report ===\n";
         for (const auto& [name, data] : system_profiles) {
-            std::cout << std::left << std::setw(20) << name
-                      << " | Avg: " << data.rolling_average_ms << " ms "
-                      << " | Total Calls: " << data.call_count << "\n";
+            std::cout << std::left << std::setw(30) << name
+                      << ": " << std::fixed << std::setprecision(4)
+                      << data.rolling_average_ms << " ms (avg over "
+                      << data.call_count << " ticks)\n";
         }
         std::cout << "==========================================\n";
     }
