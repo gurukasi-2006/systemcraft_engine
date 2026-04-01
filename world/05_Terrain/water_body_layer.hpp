@@ -101,6 +101,7 @@ public:
 
     /**
      * @brief Traces a river from a source coordinate downhill until it hits a lake or the ocean.
+     * @details Hardened against infinite generation loops via a maximum step boundary.
      * @param start The origin spring coordinate.
      * @param elevation_layer A read-only reference to the world's elevation data.
      * @param starting_width The initial width of the stream.
@@ -110,7 +111,11 @@ public:
         TileCoord current = start;
         Fixed32 current_width = starting_width;
 
-        while (true) {
+        // A river cannot mathematically be longer than the total number of tiles.
+        uint32_t max_steps = width_ * height_;
+        uint32_t steps = 0;
+
+        while (steps++ < max_steps) {
             if (!is_valid(current)) break;
 
             // If we merge into an existing lake or ocean, the river naturally ends
@@ -132,7 +137,7 @@ public:
                 break;
             }
 
-            // --- STEEPEST DESCENT SEARCH ---
+            // STEEPEST DESCENT SEARCH
             TileCoord next_coord = current;
             Fixed32 lowest_elev = current_elev;
 
@@ -143,7 +148,7 @@ public:
 
                 if (elevation_layer.is_valid(neighbor)) {
                     Fixed32 neighbor_elev = elevation_layer.get_elevation(neighbor);
-                    // Must be strictly lower to guarantee gravity flow and prevent infinite flat-loops
+                    // Must be strictly lower to guarantee gravity flow
                     if (neighbor_elev < lowest_elev) {
                         lowest_elev = neighbor_elev;
                         next_coord = neighbor;
@@ -151,7 +156,7 @@ public:
                 }
             }
 
-            // LOCAL MINIMUM: If no neighbor is lower, the river has nowhere to drain. Form a lake.
+            // If no neighbor is lower, the river has nowhere to drain. Form a lake.
             if (next_coord.x == current.x && next_coord.y == current.y) {
                 set_type(current, WaterBodyType::Lake);
                 break;
