@@ -65,8 +65,9 @@ public:
     }
 
     /**
-     * @brief Removes an entity from a tile using an ultra-fast O(1) swap-and-pop.
-     * @param coord The target coordinate.
+     * @brief Removes a specific entity from a tile's spatial ledger.
+     * @details Uses O(1) swap-and-pop for high performance.
+     * @param coord The coordinate to remove the entity from.
      * @param entity The EntityID to remove.
      */
     void remove_entity(TileCoord coord, EntityID entity) {
@@ -74,6 +75,11 @@ public:
         auto& cell_entities = spatial_grid_[get_index(coord)];
 
         auto it = std::find(cell_entities.begin(), cell_entities.end(), entity);
+        
+        //The entity MUST exist in this cell to be removed.
+        // If this triggers, the calling system has lost track of the entity's true location.
+        ENGINE_ASSERT(it != cell_entities.end(), "SpatialIndex::remove_entity - Entity not found at the specified coordinate!");
+        
         if (it != cell_entities.end()) {
             *it = cell_entities.back(); // Overwrite the target with the last element
             cell_entities.pop_back();   // Destroy the duplicated last element
